@@ -46,12 +46,14 @@ public class WindowManager {
      * Slides the window forward while packets are acknowledged in order.
      */
     public synchronized void recordAck(int ackSeq) {
-
-        // Remove acked packet
-        unackedPackets.remove(ackSeq);
-        sendTimestamps.remove(ackSeq);
-
         int oldStart = windowStart;
+
+        // Remove ALL packets ≤ ackSeq (cumulative ACK)
+        for (int seq = windowStart; seq <= ackSeq; seq++) {
+            unackedPackets.remove(seq);
+            sendTimestamps.remove(seq);
+        }
+
         // Slide window forward over continuous ACKs
         while (!unackedPackets.containsKey(windowStart) && windowStart < nextSeqToSend) {
             windowStart++;
