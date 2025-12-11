@@ -1,68 +1,132 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* ----------------------------------------
+   GLOBAL UI STYLING
+-----------------------------------------*/
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* Dark Mode Background */
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  background-color: #0B1120;
+  color: #cbd5e1;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1e293b;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 10px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ----------------------------------------
+   ANIMATION: PACKET PHYSICS
+-----------------------------------------*/
+
+/* 1. PACKET SENT — Fly diagonally */
+@keyframes fly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
   }
-  a:hover {
-    color: #747bff;
+
+  20% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
   }
-  button {
-    background-color: #f9f9f9;
+
+  50% {
+    transform: translate(20px, -20px) scale(1.1);
   }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* 2. ACK RECEIVED — Green flash pulse */
+@keyframes blink-green {
+  0% {
+    background-color: #10b981;
+    box-shadow: 0 0 15px #10b981;
+  }
+
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* 3. TIMEOUT — Shake violently */
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+/* 4. RETRANSMIT — Bounce upward */
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Animation Utility Classes */
+.animate-fly {
+  animation: fly 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-blink {
+  animation: blink-green 0.5s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-bounce {
+  animation: bounce 0.5s ease-out;
+}
+
+/* ----------------------------------------
+   SLIDING TAPE MOTION
+-----------------------------------------*/
+
+.tape-container {
+  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Optional gradient mask for left/right fade */
+.mask-gradient {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 }

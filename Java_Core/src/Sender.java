@@ -45,6 +45,9 @@ public class Sender {
 
                 sendPacket(seq, payload);
                 seq++;
+
+                System.out.println("... Simulating network delay ...");
+                Thread.sleep(800); // 0.8 seconds pause so we can see the "Fly" animation
             }
 
             checkTimeouts();
@@ -129,16 +132,24 @@ public class Sender {
 
             if (lastSend != null && now - lastSend >= timeoutMs) {
 
-                Logger.logTimeout(seq);
+                // Retrieve packet safely
+                Object packetObj = windowManager.getPacket(seq);
 
-                byte[] packetBytes = (byte[]) windowManager.getPacket(seq);
+                // SAFETY CHECK — if packet was ACKed just now, ignore timeout
+                if (packetObj != null) {
 
-                DatagramPacket udpPacket = new DatagramPacket(packetBytes, packetBytes.length, receiverAddress,
-                        receiverPort);
-                socket.send(udpPacket);
+                    Logger.logTimeout(seq);
 
-                windowManager.updateSendTimestamp(seq);
-                Logger.logRetransmission(seq);
+                    byte[] packetBytes = (byte[]) packetObj;
+
+                    DatagramPacket udpPacket = new DatagramPacket(
+                            packetBytes, packetBytes.length,
+                            receiverAddress, receiverPort);
+                    socket.send(udpPacket);
+
+                    windowManager.updateSendTimestamp(seq);
+                    Logger.logRetransmission(seq);
+                }
             }
         }
     }

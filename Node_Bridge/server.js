@@ -9,10 +9,11 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "*",
+        origin: "http://localhost:5173",
         methods: ["GET", "POST"]
     }
 });
+
 
 // 2. Setup UDP Listener (from Java Logger)
 const udpSocket = dgram.createSocket('udp4');
@@ -33,11 +34,11 @@ udpSocket.on('message', (msg, rinfo) => {
         const parsed = JSON.parse(jsonString);
         io.emit('packet_event', parsed); // send to React
     } catch (err) {
-        console.error("❌ JSON Parse Error:", err.message);
+        console.error(" JSON Parse Error:", err.message);
     }
 });
 
-// Bind UDP listener (must match Logger.java port)
+// Bind UDP listener (match with Logger.java port)
 udpSocket.bind(5000, () => {
     console.log('✅ UDP Bridge listening for Java logs on udp://localhost:5000');
 });

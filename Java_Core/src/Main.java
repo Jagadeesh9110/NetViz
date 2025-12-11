@@ -2,7 +2,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        int receiverPort = 6000; // <-- FIXED: use port 6000, NOT 5000
+        int receiverPort = 6000; //
         String receiverIp = "127.0.0.1";
         int windowSize = 5;
 
