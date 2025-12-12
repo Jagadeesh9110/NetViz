@@ -74,4 +74,21 @@ public class Logger {
             e.printStackTrace();
         }
     }
+
+    // log progress
+    public static void logProgress(long received, long total) {
+        String json = String.format(
+                "{\"event\":\"PROGRESS_UPDATE\",\"received\":%d,\"total\":%d,\"timestamp\":%d}",
+                received, total, System.currentTimeMillis());
+        sendToNode(json);
+    }
+
+    // log file completion
+    public static void logFileComplete(String filename, long size) {
+        String json = String.format(
+                "{\"event\":\"FILE_COMPLETE\",\"filename\":\"%s\",\"size\":%d,\"timestamp\":%d}",
+                filename, size, System.currentTimeMillis());
+        sendToNode(json);
+    }
+
 }

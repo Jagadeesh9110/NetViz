@@ -1,8 +1,9 @@
-# NetViz  — Real-Time Reliable UDP Sliding Window Simulator
+# NetViz Pro — Real-Time Reliable UDP Sliding Window Simulator
 
 > **© M. Jagadeeswar Reddy 2025. All Rights Reserved.**
 
-![NetViz Dashboard](versions_images/dashboard-screenshot_version1.png)
+![NetViz Pro Dashboard](versions_images/dashboard-screenshot_version2.png)
+![NetViz Basic Dashboard](versions_images/dashboard-screenshot_version1.png)
 
 ## 🚀 Overview
 
@@ -101,7 +102,10 @@ Interactive dashboard includes:
         │  Sliding Window                                                                                       
         │  Cumulative ACKs                                                                                      
         │  Retransmissions                                                                                      
-        │  FIN Handshake                                                                                        
+        │  FIN Handshake
+
+```text
+
 🧩 Technology Stack
 Frontend
 React (Vite)

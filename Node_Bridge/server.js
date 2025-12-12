@@ -1,9 +1,11 @@
 const express = require('express');
 const dgram = require('dgram');
 const http = require('http');
+const path = require('path');
+const fs = require('fs');
 const { Server } = require("socket.io");
 
-// 1. Setup Express + Socket.io
+// 1. Express + Socket.io Setup
 const app = express();
 const server = http.createServer(app);
 
@@ -14,8 +16,20 @@ const io = new Server(server, {
     }
 });
 
+// 2. Ensure "received" folder exists
+const RECEIVED_DIR = path.join(__dirname, 'received');
 
-// 2. Setup UDP Listener (from Java Logger)
+if (!fs.existsSync(RECEIVED_DIR)) {
+    fs.mkdirSync(RECEIVED_DIR);
+    console.log("📁 Created folder: Node_Bridge/received/");
+}
+
+// Serve all received files as static
+app.use('/received', express.static(RECEIVED_DIR));
+
+console.log(`📡 Serving received files at: http://localhost:3000/received/<filename>`);
+
+// 3. UDP Listener for Java Logger
 const udpSocket = dgram.createSocket('udp4');
 
 udpSocket.on('error', (err) => {
@@ -23,30 +37,61 @@ udpSocket.on('error', (err) => {
     udpSocket.close();
 });
 
-// When Java sends a log event
+// When Java sends any log event
 udpSocket.on('message', (msg, rinfo) => {
     const jsonString = msg.toString();
 
-    // Print to Node console
     console.log(`[Java -> Node]: ${jsonString}`);
 
     try {
         const parsed = JSON.parse(jsonString);
-        io.emit('packet_event', parsed); // send to React
+
+        // --- Forward all normal events ---
+        io.emit('packet_event', parsed);
+
+        // --- Special: Progress Events ---
+        if (parsed.event === "PROGRESS_UPDATE") {
+            io.emit("progress_update", {
+                received: parsed.received,
+                total: parsed.total,
+                timestamp: parsed.timestamp
+            });
+        }
+
+        // --- FILE COMPLETE  ---
+        if (parsed.event === "FILE_COMPLETE") {
+            io.emit("file_complete", {
+                filename: parsed.filename,
+                size: parsed.size
+            });
+        }
+
+
     } catch (err) {
-        console.error(" JSON Parse Error:", err.message);
+        console.error("JSON Parse Error:", err.message);
     }
 });
 
-// Bind UDP listener (match with Logger.java port)
+// Bind UDP listener (Logger.java must send to port 5000)
 udpSocket.bind(5000, () => {
     console.log('✅ UDP Bridge listening for Java logs on udp://localhost:5000');
 });
 
-// 3. Start WebSocket server for React UI
-io.on('connection', (socket) => {
-    console.log('🌐 React Dashboard connected:', socket.id);
+// 4. Start WebSocket for React UI
+io.on("connection", (socket) => {
+    console.log("React Dashboard connected:", socket.id);
+
+    socket.on("set_window_size", (data) => {
+        console.log("UI → Set window size:", data.size);
+
+        const msg = Buffer.from(
+            JSON.stringify({ event: "SET_WINDOW", size: data.size })
+        );
+
+        udpSocket.send(msg, 0, msg.length, 5001, "localhost");
+    });
 });
+
 
 server.listen(3000, () => {
     console.log('✅ WebSocket server running at ws://localhost:3000');

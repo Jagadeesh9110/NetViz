@@ -5,7 +5,7 @@ import java.util.List;
 
 public class WindowManager {
 
-    private final int windowSize; // maximum packets allowed in flight
+    private int windowSize; // maximum packets allowed in flight
     private int windowStart; // first un-ACKed sequence
     private int nextSeqToSend; // next seq available for transmission
 
@@ -100,6 +100,14 @@ public class WindowManager {
 
     public synchronized int getWindowEnd() {
         return windowStart + windowSize - 1;
+    }
+
+    /** ★ Dynamic window size change (UI → Node → Java) */
+    public synchronized void setWindowSize(int newSize) {
+        System.out.println("Window Size Changed: " + windowSize + " → " + newSize);
+        this.windowSize = newSize;
+
+        Logger.logWindowMove(windowStart, windowStart, getWindowEnd());
     }
 
     public synchronized int getNextSeqToSend() {

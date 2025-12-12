@@ -1,65 +1,70 @@
-public class CustomPacket {
-    int sequenceNumber; // to identify packet order
-    short payloadLength; // to identify payload length
-    short checkSum; // to identify payload integrity
-    byte[] payload; // actual data
+import java.nio.ByteBuffer;
 
-    public CustomPacket(int sequenceNumber, short payloadLength, byte[] payload) {
+public class CustomPacket {
+
+    public static final byte TYPE_DATA = 0; // data packet
+    public static final byte TYPE_METADATA = 1; // metadata packet
+    public static final byte TYPE_ACK = 2; // ack packet
+    public static final byte TYPE_FIN = 3; // fin packet
+
+    public byte type; // to identify packet type
+    public int sequenceNumber; // to identify packet order
+    public short payloadLength; // to identify payload length
+    public short checkSum; // to identify payload integrity
+    public byte[] payload; // actual data
+
+    // full constructor
+    public CustomPacket(byte type, int sequenceNumber, short payloadLength, byte[] payload) {
+        this.type = type;
         this.sequenceNumber = sequenceNumber;
         this.payloadLength = payloadLength;
-        this.payload = payload;
-        this.checkSum = Utils.computeChecksum(payload);
+        this.payload = (payload != null) ? payload : new byte[0];
+        this.checkSum = Utils.computeChecksum(this.payload);
     }
 
-    public CustomPacket(int sequenceNumber, byte[] payload) {
+    public CustomPacket(byte type, int sequenceNumber, byte[] payload) {
+        this.type = type;
         this.sequenceNumber = sequenceNumber;
-        this.payload = payload;
-        this.payloadLength = (short) payload.length;
-        this.checkSum = Utils.computeChecksum(payload);
+        this.payload = (payload != null) ? payload : new byte[0];
+        this.payloadLength = (short) this.payload.length;
+        this.checkSum = Utils.computeChecksum(this.payload);
     }
 
-    // This converts the packet into a raw byte array that UDP can send.
+    // convert to bytes → [type(1)][seq(4)][len(2)][checksum(2)][payload]
     public byte[] toBytes() {
-        // Convert fields into bytes
-        byte[] seqBytes = Utils.intToBytes(sequenceNumber);
-        byte[] lenBytes = Utils.shortToBytes(payloadLength);
-        byte[] checksumBytes = Utils.shortToBytes(checkSum);
-
-        // Combine header fields in order
-        byte[] header = Utils.combine(seqBytes, lenBytes);
-        header = Utils.combine(header, checksumBytes);
-
-        // Combine header + payload
-        byte[] finalPacket = Utils.combine(header, payload);
-
-        return finalPacket;
-
+        ByteBuffer bb = ByteBuffer.allocate(1 + 4 + 2 + 2 + payload.length);
+        bb.put(type);
+        bb.putInt(sequenceNumber);
+        bb.putShort(payloadLength);
+        bb.putShort(checkSum);
+        bb.put(payload);
+        return bb.array();
     }
 
+    // convert bytes → CustomPacket
     public static CustomPacket fromBytes(byte[] data) {
-        // Extract sequence number (first 4 bytes)
-        byte[] seqBytes = new byte[4];
-        System.arraycopy(data, 0, seqBytes, 0, 4);
-        int sequenceNumber = Utils.bytesToInt(seqBytes);
 
-        // Extract payload length (next 2 bytes)
-        byte[] lenBytes = new byte[2];
-        System.arraycopy(data, 4, lenBytes, 0, 2);
-        short payloadLength = Utils.bytesToShort(lenBytes);
+        if (data.length < 9)
+            throw new IllegalArgumentException("Packet too short");
 
-        // Extract checksum (next 2 bytes)
-        byte[] checksumBytes = new byte[2];
-        System.arraycopy(data, 6, checksumBytes, 0, 2);
-        short checkSum = Utils.bytesToShort(checksumBytes);
+        ByteBuffer bb = ByteBuffer.wrap(data);
 
-        // Extract payload (remaining bytes)
-        byte[] payload = new byte[payloadLength];
-        System.arraycopy(data, 8, payload, 0, payload.length);
+        byte type = bb.get(); // first byte = type
+        int seq = bb.getInt(); // next 4 = seq
+        short len = bb.getShort(); // next 2 = payload length
+        short checksum = bb.getShort(); // next 2 = checksum
 
-        // Create packet
-        CustomPacket packet = new CustomPacket(sequenceNumber, payload);
-        // Override checksum from network
-        packet.checkSum = checkSum;
+        int unsignedLen = len & 0xFFFF;
+
+        if (data.length < 9 + unsignedLen)
+            throw new IllegalArgumentException("Invalid payload length");
+
+        byte[] payload = new byte[unsignedLen];
+        if (unsignedLen > 0)
+            bb.get(payload);
+
+        CustomPacket packet = new CustomPacket(type, seq, payload);
+        packet.checkSum = checksum; // Override calculated checksum with the one from the network
 
         return packet;
     }
