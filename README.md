@@ -4,12 +4,12 @@
 
 ### 🌟 v2.0 Dashboard: Binary File Transfer Mode
 *New Features: Image/PDF support, Real-time Preview, Packet Loss Simulation, and Dynamic Window Resizing.*
-![NetViz Pro v2.0 Main](versions_images/dashboard-screenshot_version2-1.png)
-![NetViz Pro v2.0 Graph](versions_images/dashboard-screenshot_version2-2.png)
+![NetViz Pro Dashboard](versions_images/dashboard-screenshot_version2-1.png)
+![NetViz Pro Dashboard](versions_images/dashboard-screenshot_version2-2.png)
 
 ### 🔹 v1.0 Dashboard: Basic String Transfer
 *Original version demonstrating text-based packet simulation.*
-![NetViz Basic v1.0](versions_images/dashboard-screenshot_version1.png)
+![NetViz Basic Dashboard](versions_images/dashboard-screenshot_version1.png)
 
 ## 🚀 Overview
 
@@ -44,7 +44,7 @@ This design provides:
 ✔ Easier visualization
 
 ### 2. Binary File Transfer Protocol
-The core engine has been upgraded to support arbitrary file types:
+The core engine has been upgraded to support arbitrary file types (**loaded via backend configuration**, rather than UI drag-and-drop):
 * **Metadata Injection:** The first packet (Seq 0) carries the **Filename** and **File Size**.
 * **Binary Segmentation:** Reads files byte-by-byte (not string-based) to ensure data integrity for images/PDFs.
 * **Automatic Reconstruction:** The Receiver parses metadata, streams chunks to a buffer, and saves the file to disk upon completion.
