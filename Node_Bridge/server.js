@@ -21,13 +21,13 @@ const RECEIVED_DIR = path.join(__dirname, 'received');
 
 if (!fs.existsSync(RECEIVED_DIR)) {
     fs.mkdirSync(RECEIVED_DIR);
-    console.log("📁 Created folder: Node_Bridge/received/");
+    console.log(" Created folder: Node_Bridge/received/");
 }
 
 // Serve all received files as static
 app.use('/received', express.static(RECEIVED_DIR));
 
-console.log(`📡 Serving received files at: http://localhost:3000/received/<filename>`);
+console.log(` Serving received files at: http://localhost:3000/received/<filename>`);
 
 // 3. UDP Listener for Java Logger
 const udpSocket = dgram.createSocket('udp4');
@@ -74,7 +74,7 @@ udpSocket.on('message', (msg, rinfo) => {
 
 // Bind UDP listener (Logger.java must send to port 5000)
 udpSocket.bind(5000, () => {
-    console.log('✅ UDP Bridge listening for Java logs on udp://localhost:5000');
+    console.log(' UDP Bridge listening for Java logs on udp://localhost:5000');
 });
 
 // 4. Start WebSocket for React UI
@@ -105,5 +105,5 @@ io.on("connection", (socket) => {
 
 
 server.listen(3000, () => {
-    console.log('✅ WebSocket server running at ws://localhost:3000');
+    console.log(' WebSocket server running at ws://localhost:3000');
 });

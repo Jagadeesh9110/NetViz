@@ -2,6 +2,13 @@
 
 > **© M. Jagadeeswar Reddy 2025. All Rights Reserved.**
 
+### 🎥 Watch the Live Demo (60s)
+[![NetViz Pro Demo](https://img.youtube.com/vi/VI89eRaECs0/maxresdefault.jpg)](https://www.youtube.com/watch?v=VI89eRaECs0)
+
+**[▶️ Click Here to Watch the Full Demo on YouTube](https://www.youtube.com/watch?v=VI89eRaECs0)**
+
+---
+
 ### 🌟 v2.0 Dashboard: Binary File Transfer Mode
 *New Features: Image/PDF support, Real-time Preview, Packet Loss Simulation, and Dynamic Window Resizing.*
 ![NetViz Pro Dashboard](versions_images/dashboard-screenshot_version2-1.png)
