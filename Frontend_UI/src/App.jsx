@@ -146,6 +146,15 @@ const App = () => {
 
   const updateSim = (key, val) => {
     setSimSettings(prev => ({ ...prev, [key]: val }));
+
+    if (key === 'windowSize') {
+      // sends to Node.js → Java
+      socket.emit("set_window_size", { size: Number(val) });// emits here 
+    }
+
+    if (key === 'lossChance') {
+      socket.emit("set_loss_chance", { chance: Number(val) });
+    }
   };
 
   // --- RENDER PACKET ---
@@ -280,13 +289,7 @@ const App = () => {
                     <span className="text-blue-400">{simSettings.windowSize}</span>
                   </div>
                   <input type="range" min="1" max="500" value={simSettings.windowSize}
-                    onChange={(e) => {
-                      const newSize = Number(e.target.value);
-                      // update UI state
-                      updateSim('windowSize', newSize);
-                      // send to Node.js → Java
-                      socket.emit("set_window_size", { size: newSize });
-                    }}
+                    onChange={(e) => updateSim('windowSize', Number(e.target.value))}
                     className="w-full h-1 bg-slate-700 rounded cursor-pointer"
                   />
                 </div>
@@ -296,8 +299,8 @@ const App = () => {
                     <span>Simulated Packet Loss</span>
                     <span className="text-red-400">{simSettings.lossChance}%</span>
                   </div>
-                  <input type="range" min="0" max="50" value={simSettings.lossChance}
-                    onChange={(e) => updateSim('lossChance', e.target.value)}
+                  <input type="range" min="0" max="100" value={simSettings.lossChance}
+                    onChange={(e) => updateSim('lossChance', Number(e.target.value))}
                     className="w-full h-1 bg-slate-700 rounded cursor-pointer accent-red-500"
                   />
                 </div>

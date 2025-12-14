@@ -90,6 +90,17 @@ io.on("connection", (socket) => {
 
         udpSocket.send(msg, 0, msg.length, 5001, "localhost");
     });
+
+    socket.on("set_loss_chance", (data) => {
+        console.log("UI → Set Packet Loss:", data.chance + "%");
+
+        const msg = Buffer.from(
+            JSON.stringify({ event: "SET_LOSS", chance: data.chance })
+        );
+
+        udpSocket.send(msg, 0, msg.length, 5001, "localhost");
+    });
+
 });
 
 

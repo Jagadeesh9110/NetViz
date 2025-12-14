@@ -5,10 +5,12 @@ import java.nio.charset.StandardCharsets;
 public class WindowControlListener implements Runnable {
 
     private final WindowManager windowManager;
+    private final Sender sender;
     private boolean running = true;
 
-    public WindowControlListener(WindowManager manager) {
+    public WindowControlListener(WindowManager manager, Sender sender) {
         this.windowManager = manager;
+        this.sender = sender;
     }
 
     @Override
@@ -49,6 +51,27 @@ public class WindowControlListener implements Runnable {
                         System.out.println("Failed to parse window size from: " + message);
                     }
                 }
+
+                if (message.contains("\"event\":\"SET_LOSS\"")) {
+                    try {
+                        int idx = message.indexOf("\"chance\":") + 9;
+                        String num = "";
+
+                        while (idx < message.length() && Character.isDigit(message.charAt(idx))) {
+                            num += message.charAt(idx);
+                            idx++;
+                        }
+
+                        int chance = Integer.parseInt(num);
+                        System.out.println("UI → Java Packet Loss Updated to: " + chance + "%");
+
+                        sender.setLossChance(chance);
+
+                    } catch (Exception e) {
+                        System.out.println("Failed to parse loss chance from: " + message);
+                    }
+                }
+
             }
 
         } catch (Exception e) {

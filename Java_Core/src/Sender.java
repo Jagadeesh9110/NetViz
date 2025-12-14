@@ -20,6 +20,9 @@ public class Sender {
 
     private boolean running = true;
 
+    // loss simulation
+    private volatile int lossChance = 0;
+
     public Sender(String receiverIp, int receiverPort, int windowSize) throws Exception {
         this.socket = new DatagramSocket();
         this.receiverAddress = InetAddress.getByName(receiverIp);
@@ -30,9 +33,10 @@ public class Sender {
         startAckListener();
 
         // Start dynamic window size listener
-        Thread controlThread = new Thread(new WindowControlListener(windowManager));
+        Thread controlThread = new Thread(new WindowControlListener(windowManager, this));
         controlThread.setDaemon(true);
         controlThread.start();
+
     }
 
     // Public helper to send file from disk (reads bytes and calls
@@ -144,14 +148,26 @@ public class Sender {
 
     // Send a regular data packet (seq >= 1)
     private void sendPacket(int seq, byte[] payload) throws Exception {
+
         CustomPacket packet = new CustomPacket(CustomPacket.TYPE_DATA, seq, payload);
         byte[] packetBytes = packet.toBytes();
 
-        DatagramPacket udpPacket = new DatagramPacket(packetBytes, packetBytes.length, receiverAddress, receiverPort);
-        socket.send(udpPacket);
-
+        // 1. Record every packet so timeout timers work
         windowManager.recordSent(seq, packetBytes);
+
+        // 2. Log to UI (yellow SENT)
         Logger.logPacketSent(seq, windowManager.getWindowStart(), windowManager.getWindowEnd());
+
+        // 3. Simulate "network drop"
+        if (lossChance > 0 && Math.random() * 100 < lossChance) {
+            System.out.println("⚠️ [SIMULATION] Packet " + seq + " lost in transit!");
+            return; // skip socket.send()
+        }
+
+        // 4. Actually send if not lost
+        DatagramPacket udpPacket = new DatagramPacket(packetBytes, packetBytes.length, receiverAddress, receiverPort);
+
+        socket.send(udpPacket);
     }
 
     // Sends FIN packet to notify receiver
@@ -250,6 +266,12 @@ public class Sender {
                 }
             }
         }
+    }
+
+    // Set simulated packet loss chance (0-100%)
+    public synchronized void setLossChance(int chance) {
+        this.lossChance = chance;
+        System.out.println("[Sender] Simulated Packet Loss = " + chance + "%");
     }
 
     public void close() {
