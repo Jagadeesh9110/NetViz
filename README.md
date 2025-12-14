@@ -2,7 +2,7 @@
 
 > **© M. Jagadeeswar Reddy 2025. All Rights Reserved.**
 
-### 🎥 Watch the Live Demo (60s)
+### 🎥 Watch the Live Demo 
 [![NetViz Pro Demo](https://img.youtube.com/vi/VI89eRaECs0/maxresdefault.jpg)](https://www.youtube.com/watch?v=VI89eRaECs0)
 
 **[▶️ Click Here to Watch the Full Demo on YouTube](https://www.youtube.com/watch?v=VI89eRaECs0)**
